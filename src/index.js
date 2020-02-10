@@ -2,8 +2,11 @@ const express = require('express')
 const app = express()
 
 require('./database')
+    //va a poder entender los json
+app.use(express.json())
 
-app.use(require('./routes/index'))
+//todas las rutas van a comenzar con /api
+app.use('/api', require('./routes/index'))
 
 app.listen(3000);
 
