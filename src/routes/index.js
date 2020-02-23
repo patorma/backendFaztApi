@@ -1,10 +1,12 @@
 const express = require("express");
+const mongoose = require("mongoose");
 //const { Router } = require("express");
 //const bcrypt = require("bcrypt");
 //const router = Router();
 const api = express.Router();
 
 const jwt = require("jsonwebtoken");
+mongoose.set("useCreateIndex", true);
 
 //const User = require("../models/User");
 //const { verifyToken } = require("../verify/verification");

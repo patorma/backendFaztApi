@@ -1,3 +1,4 @@
+require("dotenv").config();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -12,17 +13,19 @@ async function holaMundo(req, res, next) {
 }
 async function registrarUsuario(req, res, next) {
     try {
-        const { email, password } = req.body;
+        const { name, email, password, role } = req.body;
         const newUser = new User({
+            name,
             email,
-            password: bcrypt.hashSync(password, 10)
+            password: bcrypt.hashSync(password, 10),
+            role
         });
 
         await newUser.save();
 
         //una vez guardado en la bd el usuario creo un token
         const token = jwt.sign({ _id: newUser._id }, "secretkey");
-        res.status(200).json({ token });
+        res.status(201).json({ token, usuario: newUser });
     } catch (e) {
         res.status(500).send({ message: e.message });
         next();
@@ -41,10 +44,18 @@ async function loginUsuario(req, res, next) {
             return res.status(400).send("Contraseña incorrecta");
 
         //se devuelve un token, si los datos son correctos
-        const token = jwt.sign({ _id: user._id }, "secretkey");
+        //_id: user._id
+        const token = jwt.sign({
+                usuario: user
+            },
+            process.env.SEED_AUTENTICACION, {
+                expiresIn: process.env.CADUCIDAD_TOKEN
+            },
+            "secretkey"
+        );
 
         //cuando el usuario hace login se devuelve
-        return res.status(200).json({ token });
+        return res.status(200).json({ usuario: user, token });
     } catch (e) {
         res.status(500).send({ message: e.message });
         next();
