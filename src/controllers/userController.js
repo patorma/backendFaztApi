@@ -37,11 +37,11 @@ async function loginUsuario(req, res, next) {
 
         //si se ecuentra ese correo se guarda en una constante
         const user = await User.findOne({ email });
-        if (!user) return res.status(400).send("El correo no existe");
+        if (!user) return res.status(401).send("El correo no existe");
 
         //se comprueba si la contraseña recibida es igual a la encontrada
         if (!bcrypt.compareSync(password, user.password))
-            return res.status(400).send("Contraseña incorrecta");
+            return res.status(401).send("Contraseña incorrecta");
 
         //se devuelve un token, si los datos son correctos
         //_id: user._id
