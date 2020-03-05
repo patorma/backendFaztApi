@@ -39,4 +39,4 @@ userSchema.plugin(uniqueValidator, {
     message: "{PATH} debe ser único"
 });
 
-module.exports = model("User", userSchema);
+module.exports = model("User", userSchema, 'users');

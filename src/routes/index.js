@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 //const { Router } = require("express");
@@ -38,25 +39,38 @@ api.get("/profile", verifyToken, verProfile);
 
 module.exports = api;
 
+
 //verifica en cada ruta el token
 function verifyToken(req, res, next) {
     //console.log(req.headers.authorization);
-    if (!req.headers.authorization) {
-        return res.status(401).send("Aunthorize request");
-    }
-    //separamos lo que viene en authorization como si fuera un arreglo
-    const token = req.headers.authorization.split(" ")[1];
+    try {
 
-    if (token === "null") {
-        return res.status(401).send("Aunthorize request");
-    }
+        // jwtTokent = req.header('Authorization')
+        if (!req.headers.authorization) {
+            return res.status(401).send("Aunthorize request2");
+        }
+        //separamos lo que viene en authorization como si fuera un arreglo
+        const token = req.headers.authorization.split(" ")[1];
+        //console.log(token)
+        if (token === "null") {
+            return res.status(401).send("Aunthorize request3");
+        }
 
-    //si pasa las validaciones anteriores , viniendo un token
-    //verifico el token que me pasan
-    //se verifica con llave
-    //se obtiene datos que vienen en el token
-    const payload = jwt.verify(token, "secretkey");
-    //console.log(payload);
-    req.userId = payload._id;
-    next();
+        //si pasa las validaciones anteriores , viniendo un token
+        //verifico el token que me pasan
+        //se verifica con llave
+        //se obtiene datos que vienen en el token
+        const payload = jwt.verify(token, process.env.SECRET_KEY);
+
+        //console.log(payload);
+        if (!payload) {
+            return res.status(401).send('Unauhtorized Request2020');
+        }
+        req.userId = payload._id;
+        next();
+    } catch (e) {
+        console.log(e);
+        return res.status(401).send('Unauhtorized Request3');
+
+    }
 }

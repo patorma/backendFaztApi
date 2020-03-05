@@ -24,8 +24,9 @@ async function registrarUsuario(req, res, next) {
         await newUser.save();
 
         //una vez guardado en la bd el usuario creo un token
-        const token = jwt.sign({ _id: newUser._id }, "secretkey");
+        const token = jwt.sign({ _id: newUser._id, name, email, password, role }, process.env.SECRET_KEY);
         res.status(201).json({ token, usuario: newUser });
+        next()
     } catch (e) {
         res.status(500).send({ message: e.message });
         next();
@@ -33,7 +34,7 @@ async function registrarUsuario(req, res, next) {
 }
 async function loginUsuario(req, res, next) {
     try {
-        const { email, password } = req.body;
+        const { name, email, password, role } = req.body;
 
         //si se ecuentra ese correo se guarda en una constante
         const user = await User.findOne({ email });
@@ -42,20 +43,25 @@ async function loginUsuario(req, res, next) {
         //se comprueba si la contraseña recibida es igual a la encontrada
         if (!bcrypt.compareSync(password, user.password))
             return res.status(401).send("Contraseña incorrecta");
-
+        const token = jwt.sign({ name, email, password, role }, process.env.SECRET_KEY);
         //se devuelve un token, si los datos son correctos
         //_id: user._id
-        const token = jwt.sign({
-                usuario: user
+        /*const token = jwt.sign({
+                usuario: user,
+                password,
+                name,
+                role
             },
             process.env.SEED_AUTENTICACION, {
                 expiresIn: process.env.CADUCIDAD_TOKEN
             },
-            "secretkey"
-        );
+            process.env.SECRET_KEY
+        );*/
 
         //cuando el usuario hace login se devuelve
+
         return res.status(200).json({ usuario: user, token });
+
     } catch (e) {
         res.status(500).send({ message: e.message });
         next();
@@ -89,9 +95,9 @@ async function verTareasPublicas(req, res, next) {
     }
 }
 
-async function tareasPrivadas(req, res, next) {
+function tareasPrivadas(req, res, next) {
     try {
-        await res.json([{
+        res.json([{
                 _id: 1,
                 name: "Task One",
                 description: "lorem ipsum",
